@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# cloudfork outputs: snapshots are meant to be committed, sample data and reports are not
+cloudfork-data/
+cloudfork-report.json

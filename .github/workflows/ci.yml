@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    services:
+      floci:
+        image: floci/floci:latest
+        ports:
+          - 4566:4566
+    env:
+      FLOCI_ENDPOINT: http://localhost:4566
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test:unit
+      - name: Wait for Floci
+        run: curl --silent --output /dev/null --retry 60 --retry-delay 2 --retry-connrefused "$FLOCI_ENDPOINT/"
+      - run: npm run test:integration
